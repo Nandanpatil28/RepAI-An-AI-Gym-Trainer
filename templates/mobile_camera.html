@@ -1,0 +1,38 @@
+{% extends 'base.html' %}{% block title %}RepAI | Remote Camera{% endblock %}{% block content %}
+<section class="mobile-camera">
+{% if token %}
+<div class="mobile-brand">
+<svg class="mobile-logo" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 27v10m8-16v22m32-22v22m8-16v10M16 32h32M22 25v14m20-14v14"/><path d="M20 22h5v20h-5zm19 0h5v20h-5z"/></svg>
+<div><strong>RepAI</strong><span>REMOTE CAMERA</span></div>
+</div>
+<p id="mobile-status" class="connection-status waiting">Connecting to RepAI…</p>
+<video id="phone-camera" autoplay muted playsinline></video>
+<canvas id="phone-canvas" hidden></canvas>
+<p id="mobile-message" class="mobile-msg">Start your camera when you are ready. Rear camera is used by default.</p>
+<div class="mobile-controls">
+<button id="phone-start" class="primary mobile-btn">START CAMERA</button>
+<button id="phone-switch" class="secondary mobile-btn">SWITCH CAMERA</button>
+<button id="phone-stop" class="danger mobile-btn" disabled>STOP CAMERA</button>
+</div>
+<div id="camera-error" class="camera-error" hidden></div>
+{% elif error == 'in_use' %}
+<div class="mobile-brand">
+<svg class="mobile-logo" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 27v10m8-16v22m32-22v22m8-16v10M16 32h32M22 25v14m20-14v14"/><path d="M20 22h5v20h-5zm19 0h5v20h-5z"/></svg>
+<div><strong>RepAI</strong><span>REMOTE CAMERA</span></div>
+</div>
+<h2>Camera session already in use</h2>
+<p>Another phone is currently connected to this session. Disconnect it from the PC dashboard first, then scan the QR code again.</p>
+{% else %}
+<div class="mobile-brand">
+<svg class="mobile-logo" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 27v10m8-16v22m32-22v22m8-16v10M16 32h32M22 25v14m20-14v14"/><path d="M20 22h5v20h-5zm19 0h5v20h-5z"/></svg>
+<div><strong>RepAI</strong><span>REMOTE CAMERA</span></div>
+</div>
+<h2>Camera link expired</h2>
+<p>Return to the computer and generate a new QR code from the Mobile Camera Connection page.</p>
+{% endif %}
+</section>
+{% if token %}
+<script>window.mobileCameraToken={{ token|tojson }};</script>
+<script src="{{ url_for('static', filename='js/mobile_camera.js') }}"></script>
+{% endif %}
+{% endblock %}

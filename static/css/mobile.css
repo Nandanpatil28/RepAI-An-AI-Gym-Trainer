@@ -1,0 +1,61 @@
+/* Mobile camera feed on PC */
+#mobile-feed{display:block;width:100%;height:100%;max-height:580px;object-fit:contain;background:#030506}
+button:disabled{opacity:.45;cursor:not-allowed}
+.camera-placeholder{display:grid;place-content:center;position:absolute;inset:0;color:var(--muted);text-align:center;font-weight:bold;letter-spacing:.08em;background:#030506}.camera-placeholder[hidden]{display:none}.camera-placeholder small{margin-top:10px;font-size:.7rem;letter-spacing:.05em;font-weight:normal}
+
+/* Pairing section */
+.pairing{display:flex;gap:25px;align-items:flex-start;padding-top:20px;margin-top:16px}
+.pairing-qr{flex-shrink:0;text-align:center}
+.pairing-qr img{width:190px;height:190px;background:white;padding:8px;border-radius:8px}
+.pair-url{font-size:.78rem;color:var(--muted);word-break:break-all;margin-top:8px;max-width:190px}
+.pairing-info h3{margin:0}
+.pairing-info p{color:var(--muted)}
+.pairing-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+
+/* ========== Mobile Camera Page (phone) ========== */
+.mobile-camera{max-width:620px;margin:0 auto;text-align:center;padding:12px}
+
+/* Brand block on phone */
+.mobile-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px}
+.mobile-brand svg.mobile-logo{width:36px;height:36px;stroke:var(--lime);stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.mobile-brand strong{font-size:1.5rem;color:#fff;display:block;line-height:1.1}
+.mobile-brand span{font-size:.72rem;letter-spacing:.15em;color:var(--lime);font-weight:bold}
+
+/* Connection status pill */
+.connection-status{display:inline-block;padding:8px 18px;border-radius:20px;font-weight:bold;font-size:.85rem;letter-spacing:.04em;margin:8px 0 16px}
+.connection-status.waiting{background:#2a3040;color:#ffc445}
+.connection-status.connected{background:#1a3a25;color:#5dff8f}
+.connection-status.error{background:#482126;color:#ff8a8a}
+
+/* Phone camera video */
+.mobile-camera video{display:block;width:100%;max-height:60vh;object-fit:cover;background:#05080b;border:1px solid var(--line);border-radius:12px;margin:12px 0}
+
+/* Mobile message text */
+.mobile-msg{color:var(--muted);font-size:.9rem;margin:0 0 16px}
+
+/* Mobile control buttons */
+.mobile-controls{display:flex;flex-direction:column;gap:12px;margin:16px 0}
+.mobile-btn{width:100%;padding:16px 20px;font-size:1rem;border-radius:10px;min-height:52px}
+
+/* Camera error box */
+.camera-error{background:#482126;color:#ffd8d8;padding:14px;border-radius:8px;font-size:.9rem;margin:12px 0;text-align:left}
+
+/* In-use / expired error pages */
+.mobile-camera h2{margin:20px 0 10px;font-size:1.3rem}
+.mobile-camera>p{color:var(--muted)}
+
+/* Original player (video analysis) */
+.original-player{margin-top:20px}
+.original-player summary{cursor:pointer;font-weight:bold}
+.original-player video{width:100%;margin-top:15px;max-height:500px}
+
+/* Responsive */
+@media(max-width:600px){
+  .pairing{align-items:flex-start;flex-direction:column}
+  .pairing-qr img{width:160px;height:160px}
+  .pair-url{max-width:100%}
+  .mobile-brand svg.mobile-logo{width:30px;height:30px}
+  .mobile-brand strong{font-size:1.3rem}
+  .mobile-camera{padding:8px}
+}
