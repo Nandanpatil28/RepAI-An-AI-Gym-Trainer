@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Achievements{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">MILESTONES</p><h1>Achievements</h1><p>Earned once per account from genuine workouts, schedules, goals, and streaks.</p></section>
+<section class="panel"><div class="section-title"><h2>Current streak</h2><span>{{ streak }} days</span></div></section>
+<section class="library-grid">
+  {% for row in earned %}
+  <article class="panel exercise-card"><p class="eyebrow">EARNED</p><h2>{{ row.title }}</h2><p>{{ row.description }}</p><p class="empty">{{ row.earned_at[:16].replace('T', ' ') }}</p></article>
+  {% else %}<section class="panel"><p class="empty">No achievements yet. Complete a workout or scheduled plan to start earning them.</p></section>{% endfor %}
+</section>
+<section class="panel">
+  <div class="section-title"><h2>Upcoming milestones</h2><span>Progress so far</span></div>
+  <div class="goal-list">{% for item in upcoming %}<article class="goal-card"><h3>{{ item.title }}</h3><div class="progress-bar"><span style="width: {{ (item.progress / item.target * 100)|round }}%"></span></div><p>{{ item.progress }} / {{ item.target }}</p></article>{% endfor %}</div>
+</section>
+{% endblock %}

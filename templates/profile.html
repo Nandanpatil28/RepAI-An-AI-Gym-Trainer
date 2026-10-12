@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Profile{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <p class="eyebrow">PERSONAL DETAILS</p>
+  <h1>Profile</h1>
+  <p>These details drive your estimated calorie targets, dietary filters, and weekly meal plan.</p>
+</section>
+
+<section class="panel">
+  <form class="profile-form" method="post">
+    <div class="form-grid">
+      <label>Age
+        <input type="number" name="age" min="8" max="100" value="{{ profile.age if profile else '' }}">
+      </label>
+      <label>Height (cm)
+        <input type="number" step="0.1" name="height_cm" min="80" max="250" value="{{ profile.height_cm if profile else '' }}">
+      </label>
+      <label>Weight (kg)
+        <input type="number" step="0.1" name="weight_kg" min="20" max="300" value="{{ profile.weight_kg if profile else '' }}">
+      </label>
+      <label>Fitness goal
+        <select name="fitness_goal">
+          <option value="">Choose goal</option>
+          {% for goal in goals %}
+          <option value="{{ goal }}" {% if profile and profile.fitness_goal == goal %}selected{% endif %}>{{ goal.replace('_', ' ')|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Activity level
+        <select name="activity_level">
+          <option value="">Choose activity</option>
+          {% for activity in activities %}
+          <option value="{{ activity }}" {% if profile and profile.activity_level == activity %}selected{% endif %}>{{ activity.replace('_', ' ')|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Dietary preference
+        <select name="dietary_preference">
+          <option value="">Choose preference</option>
+          {% for preference in preferences %}
+          <option value="{{ preference }}" {% if profile and profile.dietary_preference == preference %}selected{% endif %}>{{ preference|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Meals per day
+        <input type="number" name="meals_per_day" min="3" max="6" value="{{ profile.meals_per_day if profile and profile.meals_per_day else 3 }}">
+      </label>
+      <label>Preferred meal times
+        <input name="preferred_meal_times" placeholder="08:00, 13:00, 19:30" value="{{ profile.preferred_meal_times if profile else '' }}">
+      </label>
+      <label>Optional budget
+        <input name="budget" placeholder="Low, medium, high, or weekly amount" value="{{ profile.budget if profile else '' }}">
+      </label>
+    </div>
+
+    <div class="form-grid wide">
+      <label>Food allergies and intolerances
+        <textarea name="allergies" rows="3" placeholder="Peanuts, shellfish, lactose">{{ profile.allergies if profile else '' }}</textarea>
+      </label>
+      <label>Foods liked
+        <textarea name="liked_foods" rows="3" placeholder="Paneer, rice, oats">{{ profile.liked_foods if profile else '' }}</textarea>
+      </label>
+      <label>Foods disliked or avoided
+        <textarea name="disliked_foods" rows="3" placeholder="Mushrooms, eggs, fish">{{ profile.disliked_foods if profile else '' }}</textarea>
+      </label>
+      <label>Regional food preferences
+        <textarea name="regional_preference" rows="3" placeholder="South Indian, North Indian, Mediterranean">{{ profile.regional_preference if profile else '' }}</textarea>
+      </label>
+      <label>Medical conditions, pregnancy, or clinical notes
+        <textarea name="medical_notes" rows="3" placeholder="This planner will not generate a medical diet.">{{ profile.medical_notes if profile else '' }}</textarea>
+      </label>
+    </div>
+
+    <div class="controls">
+      <button class="primary" type="submit">SAVE PROFILE</button>
+      <a class="secondary" href="{{ url_for('meal_planner') }}">OPEN MEAL PLANNER</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

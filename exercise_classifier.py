@@ -9,8 +9,6 @@ import numpy as np
 from collections import deque
 from body_part_angle import BodyPartAngle
 from utils import detection_body_part, calculate_angle
-
-
 class ExerciseClassifier:
     """Classifies the current exercise from pose landmarks with temporal stability."""
 
@@ -242,9 +240,13 @@ class ExerciseClassifier:
 
         # ----- PULL-UP -----
         s = 0.0
-        # Wrists above or near elbows (hands gripping bar overhead)
-        if wrist_y < elbow_y:
+        # Wrists clearly above shoulders indicate an overhead bar grip. Raised
+        # arms during squats may put wrists above elbows, so that gets only a
+        # small score unless the hands are actually overhead.
+        if wrist_y < shoulder_y - 0.06:
             s += 0.25
+        elif wrist_y < elbow_y:
+            s += 0.08
         elif abs(wrist_y - elbow_y) < 0.05:
             s += 0.10
         # Elbows above or near shoulders
@@ -258,6 +260,14 @@ class ExerciseClassifier:
         # Body vertical
         if body_is_vertical:
             s += 0.15
+        # Pull-ups are an upper-body movement with legs usually extended; squats
+        # can also show high hands, so bent knees must strongly reduce this score.
+        if avg_leg_angle > 160:
+            s += 0.10
+        elif avg_leg_angle < 150:
+            s -= 0.35
+        else:
+            s -= 0.15
         # Arms not fully straight (engaged in pull-up motion)
         if avg_arm_angle < 150:
             s += 0.10

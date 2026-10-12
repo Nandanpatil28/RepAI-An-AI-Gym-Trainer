@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Meal Planner{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">PERSONALIZED NUTRITION</p>
+    <h1>Meal planner</h1>
+    <p>Estimated daily and weekly meals based on your saved profile, dietary filters, and fitness goal.</p>
+  </div>
+  <form method="post" action="{{ url_for('generate_meal_plan_route') }}">
+    <button class="primary" type="submit">{% if plan %}REGENERATE PLAN{% else %}GENERATE PLAN{% endif %}</button>
+  </form>
+</section>
+
+{% if not profile %}
+<section class="panel">
+  <h2>Complete your profile first</h2>
+  <p class="empty">Add age, height, weight, goal, activity level, dietary preference, allergies, and food preferences before generating meals.</p>
+  <a class="primary" href="{{ url_for('profile') }}">OPEN PROFILE</a>
+</section>
+{% else %}
+<section class="meal-summary-grid">
+  <article class="stat"><span>Goal</span><strong>{{ profile.fitness_goal.replace('_', ' ')|title if profile.fitness_goal else 'Not set' }}</strong></article>
+  <article class="stat"><span>Diet</span><strong>{{ profile.dietary_preference|title if profile.dietary_preference else 'Not set' }}</strong></article>
+  <article class="stat"><span>Meals/day</span><strong>{{ profile.meals_per_day or 3 }}</strong></article>
+  {% if targets %}
+  <article class="stat"><span>Estimated target</span><strong>{{ targets.calories }} kcal</strong></article>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if targets %}
+<section class="panel nutrition-method">
+  <div class="section-title"><h2>Nutrition estimate method</h2><a href="{{ url_for('profile') }}">Edit profile</a></div>
+  <p>{{ targets.method }} Calories and macros are estimates, not exact nutritional values.</p>
+  {% if targets.safety_note %}<p class="flash error">{{ targets.safety_note }}</p>{% endif %}
+  {% if profile and profile.medical_notes %}<p class="flash error">Medical conditions, pregnancy, and clinical diets need qualified dietary guidance. This page is a general fitness planner only.</p>{% endif %}
+</section>
+{% endif %}
+
+{% if daily_progress %}
+<section class="panel">
+  <div class="section-title"><h2>Today's progress</h2><span>{{ daily_progress.completed }} of {{ daily_progress.total_meals }} meals completed</span></div>
+  <div class="summary-grid">
+    <div><span>Planned calories</span><strong>{{ daily_progress.planned.calories }}</strong></div>
+    <div><span>Consumed calories</span><strong>{{ daily_progress.consumed.calories }}</strong></div>
+    <div><span>Consumed protein</span><strong>{{ daily_progress.consumed.protein }} g</strong></div>
+    <div><span>Consumed carbs</span><strong>{{ daily_progress.consumed.carbs }} g</strong></div>
+    <div><span>Consumed fats</span><strong>{{ daily_progress.consumed.fat }} g</strong></div>
+  </div>
+</section>
+{% endif %}
+
+{% if plan_data %}
+<section class="meal-week">
+  {% for day in plan_data.days %}
+  {% set day_index = loop.index0 %}
+  <article class="panel meal-day">
+    <div class="section-title">
+      <h2>{{ day.label }} <span>{{ day.date }}</span></h2>
+      <span>{{ day.totals.calories }} kcal · {{ day.totals.protein }} g protein · {{ day.totals.carbs }} g carbs · {{ day.totals.fat }} g fat</span>
+    </div>
+    <div class="meal-list">
+      {% for meal in day.meals %}
+      {% set meal_index = loop.index0 %}
+      {% set log = logs.get((day_index, meal_index)) %}
+      <article class="meal-card">
+        <div class="meal-card-head">
+          <div>
+            <span class="meal-slot">{{ meal.slot|title }} · {{ meal.time }}</span>
+            <h3>{{ meal.name }}</h3>
+          </div>
+          <span class="completion {{ 'done' if log and log.completed else '' }}">{{ 'Completed' if log and log.completed else 'Planned' }}</span>
+        </div>
+        <p><strong>Portion:</strong> {{ meal.portion }}</p>
+        <p><strong>Ingredients:</strong> {{ meal.ingredients|join(', ') }}</p>
+        <p><strong>Prep:</strong> {{ meal.instructions }}</p>
+        <p><strong>Substitutions:</strong> {{ meal.substitutions }}</p>
+        <div class="macro-row">
+          <span>{{ meal.nutrition.calories }} kcal</span>
+          <span>{{ meal.nutrition.protein }} g protein</span>
+          <span>{{ meal.nutrition.carbs }} g carbs</span>
+          <span>{{ meal.nutrition.fat }} g fat</span>
+        </div>
+        <form class="meal-log-form" method="post" action="{{ url_for('log_meal') }}">
+          <input type="hidden" name="plan_id" value="{{ plan.id }}">
+          <input type="hidden" name="day_index" value="{{ day_index }}">
+          <input type="hidden" name="meal_index" value="{{ meal_index }}">
+          <label class="check-row"><input type="checkbox" name="completed" {% if log and log.completed %}checked{% endif %}> Mark completed</label>
+          <label>Actual intake
+            <input name="actual_intake" placeholder="Optional notes" value="{{ log.actual_intake if log else '' }}">
+          </label>
+          <div class="compact-grid">
+            <label>Calories
+              <input type="number" step="0.1" name="actual_calories" value="{{ log.actual_calories if log and log.actual_calories is not none else '' }}">
+            </label>
+            <label>Protein
+              <input type="number" step="0.1" name="actual_protein" value="{{ log.actual_protein if log and log.actual_protein is not none else '' }}">
+            </label>
+            <label>Carbs
+              <input type="number" step="0.1" name="actual_carbs" value="{{ log.actual_carbs if log and log.actual_carbs is not none else '' }}">
+            </label>
+            <label>Fats
+              <input type="number" step="0.1" name="actual_fat" value="{{ log.actual_fat if log and log.actual_fat is not none else '' }}">
+            </label>
+          </div>
+          <button class="secondary" type="submit">SAVE MEAL LOG</button>
+        </form>
+      </article>
+      {% endfor %}
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% elif profile %}
+<section class="panel">
+  <h2>No meal plan yet</h2>
+  <p class="empty">Generate a plan after saving your profile. Allergens and avoided foods will be filtered out.</p>
+</section>
+{% endif %}
+{% endblock %}

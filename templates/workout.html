@@ -1,5 +1,95 @@
 {% extends 'base.html' %}{% block title %}RepAI | Live Workout{% endblock %}{% block content %}
-<section class="page-heading"><p class="eyebrow">REAL-TIME POSE COACH</p><h1>Live laptop camera</h1><p id="camera-message">Press Start Camera when you are ready to begin your workout.</p></section>
-<section class="workout-layout"><div class="camera-card"><video id="camera" autoplay muted playsinline hidden></video><canvas id="frame-canvas" hidden></canvas><div class="camera-placeholder" id="camera-placeholder">CAMERA PREVIEW<br><small id="camera-state">CAMERA NOT STARTED</small></div><div class="camera-label">LIVE LAPTOP CAMERA <span id="live-dot"></span></div></div><aside class="hud panel"><p>MODE <strong id="mode">SQUAT <small>(AUTO)</small></strong></p><p>REPS <strong id="reps">0</strong></p><p>STATUS <strong id="status">READY</strong></p><p>CONFIDENCE <strong id="confidence">0%</strong></p><p id="detecting" class="detecting" hidden>DETECTING MOVEMENT…</p></aside></section>
-<section class="controls"><button id="start-camera" class="primary" type="button">START CAMERA</button><button id="stop-camera" class="secondary" type="button" disabled>STOP CAMERA</button><button id="end-workout" class="danger" type="button">END WORKOUT</button></section>
-<section class="panel"><div class="section-title"><h2>Workout summary</h2><span>Keyboard: 1–5 manual · A auto · R reset · C clear · Q end</span></div><div class="summary-grid">{% for key,label in [('pushup','Push-Up'),('pullup','Pull-Up'),('situp','Sit-Up'),('squat','Squat'),('walk','Walking')] %}<div><span>{{ label }}</span><strong id="counter-{{ key }}">0</strong></div>{% endfor %}</div></section><script src="{{ url_for('static', filename='js/workout.js') }}"></script>{% endblock %}
+<section class="page-heading"><p class="eyebrow">REAL-TIME POSE COACH</p><h1>AI Fitness Workout</h1><p id="camera-message">Choose automatic detection or select a targeted exercise, then start the workout.</p></section>
+
+<!-- 1. TOP: choose workout launcher -->
+<section class="workout-topbar" aria-label="Workout selection">
+  <button id="choose-workout" class="primary" type="button" aria-expanded="false" aria-controls="exercise-selection">CHOOSE WORKOUT</button>
+  <p id="selected-workout-label">No workout selected</p>
+</section>
+
+<section class="panel exercise-selection-panel" id="exercise-selection" hidden>
+  <div class="section-title"><h2>Choose Workout</h2><span>Select one mode before starting.</span></div>
+  <div class="exercise-grid">
+    <button type="button" class="exercise-btn" data-exercise="auto" data-label="Automatic Detection">
+      <span class="exercise-icon">AUTO</span>
+      <span class="exercise-name">Automatic Detection</span>
+    </button>
+    {% for key,label in [('push-up','Push-Up'),('pull-up','Pull-Up'),('sit-up','Sit-Up'),('squat','Squat'),('walk','Walking')] %}
+    <button type="button" class="exercise-btn" data-exercise="{{ key }}" data-label="{{ label }}">
+      <span class="exercise-icon">{{ label }}</span>
+      <span class="exercise-name">{{ label }}</span>
+    </button>
+    {% endfor %}
+  </div>
+  <button id="confirm-exercise" class="primary" type="button" disabled>SELECT AN EXERCISE TO START</button>
+</section>
+
+<!-- 2. MIDDLE: camera left, live stats right -->
+<div class="workout-layout" id="workout-main" style="display: none;">
+  <div class="camera-card">
+    <video id="camera" autoplay muted playsinline hidden></video>
+    <canvas id="frame-canvas" hidden></canvas>
+    <canvas id="overlay-canvas" hidden></canvas>
+    <div class="camera-placeholder" id="camera-placeholder">CAMERA PREVIEW<br><small id="camera-state">CAMERA NOT STARTED</small></div>
+    <div class="camera-label">LIVE CAMERA <span id="live-dot"></span></div>
+  </div>
+
+  <div class="workout-sidebar">
+    <aside class="hud panel">
+      <div class="hud-row">
+        <div class="hud-group">
+          <p class="hud-label">EXERCISE MODE</p>
+          <p class="hud-value"><strong id="mode">-</strong> <small id="mode-type"></small></p>
+        </div>
+        <div class="hud-group">
+          <p class="hud-label">TIMER</p>
+          <p class="hud-value timer-display" id="timer">00:00</p>
+        </div>
+      </div>
+      <div class="hud-row">
+        <div class="hud-group">
+          <p class="hud-label" id="count-label">REPETITION COUNT</p>
+          <p class="hud-value large" id="reps">0</p>
+        </div>
+        <div class="hud-group">
+          <p class="hud-label">STATUS</p>
+          <p class="hud-value" id="status">WAITING</p>
+        </div>
+      </div>
+      <p class="hud-label">CONFIDENCE</p>
+      <div class="confidence-bar"><div class="confidence-fill" id="confidence-fill"></div></div>
+      <p class="confidence-text" id="confidence-text">0%</p>
+      <p id="detecting" class="detecting" hidden>DETECTING MOVEMENT...</p>
+      <div class="hud-feedback" id="feedback-panel">
+        <p class="hud-label">LIVE FEEDBACK</p>
+        <div id="feedback-content" class="feedback-content">
+          <p class="feedback-placeholder">Waiting for person.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- 3. BELOW BOTH COLUMNS: workout controls -->
+<div class="panel workout-controls-bar" id="workout-controls-bar" style="display: none;">
+  <div class="controls-row" id="workout-controls">
+    <button id="start-camera" class="primary" type="button">START</button>
+    <button id="pause-workout" class="secondary" type="button" disabled>PAUSE</button>
+    <button id="mode-toggle" class="secondary" type="button" title="Toggle Auto/Manual mode">TARGETED MODE</button>
+    <button id="reset-reps" class="secondary" type="button">RESET REPS</button>
+    <button id="stop-camera" class="secondary" type="button" disabled>STOP CAMERA</button>
+    <button id="end-workout" class="danger" type="button">END WORKOUT</button>
+  </div>
+</div>
+
+<!-- 4. BOTTOM: workout summary -->
+<section class="panel" id="workout-summary" style="display: none;">
+  <div class="section-title"><h2>Workout Summary</h2><span>Actual results from this workout.</span></div>
+  <div class="summary-grid">
+    {% for key,label in [('pushup','Push-Up'),('pullup','Pull-Up'),('situp','Sit-Up'),('squat','Squat'),('walk','Walking Steps')] %}
+    <div><span>{{ label }}</span><strong id="counter-{{ key }}">0</strong></div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>window.preselectedExercise={{ selected_exercise|default('', true)|tojson }};</script><script src="{{ url_for('static', filename='js/workout.js') }}"></script>{% endblock %}

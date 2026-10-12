@@ -4,7 +4,14 @@ import pandas as pd
 import numpy as np
 import cv2
 
-mp_pose = mp.solutions.pose
+# Lazy-load mp_pose to avoid import issues
+_mp_pose = None
+
+def get_mp_pose():
+    global _mp_pose
+    if _mp_pose is None:
+        _mp_pose = mp.solutions.pose
+    return _mp_pose
 
 def calculate_angle(a, b, c):
     a = np.array(a)  
@@ -23,6 +30,7 @@ def calculate_angle(a, b, c):
 
 
 def detection_body_part(landmarks, body_part_name):
+    mp_pose = get_mp_pose()
     return [
         landmarks[mp_pose.PoseLandmark[body_part_name].value].x,
         landmarks[mp_pose.PoseLandmark[body_part_name].value].y,
@@ -31,6 +39,7 @@ def detection_body_part(landmarks, body_part_name):
 
 
 def detection_body_parts(landmarks):
+    mp_pose = get_mp_pose()
     body_parts = pd.DataFrame(columns=["body_part", "x", "y"])
 
     for i, lndmrk in enumerate(mp_pose.PoseLandmark):

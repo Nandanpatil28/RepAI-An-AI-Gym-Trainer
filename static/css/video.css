@@ -1,1 +1,408 @@
-.choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:0 0 30px}.choice-card{background:linear-gradient(145deg,#1a2936,#111822);border:1px solid var(--line);border-radius:12px;padding:25px;text-decoration:none;display:grid;gap:6px;transition:transform .15s,border-color .15s}.choice-card:hover{transform:translateY(-2px);border-color:var(--lime)}.choice-card span{font-size:.75rem;letter-spacing:.12em;color:var(--lime);font-weight:bold}.choice-card strong{color:var(--text);font-size:1.25rem}.choice-card small{color:var(--muted)}.upload-panel{max-width:700px}.drop-zone{display:grid;place-items:center;gap:8px;min-height:220px;border:2px dashed #405167;border-radius:10px;cursor:pointer;text-align:center;padding:20px}.drop-zone:hover,.drop-zone.dragging{border-color:var(--lime);background:#1a2a1c}.drop-zone input{display:none}.drop-zone span,.upload-message{color:var(--muted)}.analysis-player{display:grid;place-items:center}.analysis-player img{width:100%;max-height:580px;object-fit:contain;min-height:350px;background:#030506}.video-overlay{position:absolute;bottom:14px;left:14px;right:14px;display:flex;justify-content:space-between;background:#111b;padding:7px 10px;border-radius:5px;font-size:.8rem}.analysis-progress progress{width:100%;height:13px;accent-color:var(--lime)}.total-line{margin:25px 0 0;font-size:1.1rem}.total-line span{color:var(--lime)}@media(max-width:800px){.choice-grid{grid-template-columns:1fr}.analysis-player img{min-height:270px}}
+.choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:0 0 30px}.choice-card{background:var(--choice-gradient);border:1px solid var(--line);border-radius:12px;padding:25px;text-decoration:none;display:grid;gap:6px;transition:transform .15s,border-color .15s,background .15s}.choice-card:hover{transform:translateY(-2px);border-color:var(--lime)}.choice-card span{font-size:.75rem;letter-spacing:.12em;color:var(--lime);font-weight:bold}.choice-card strong{color:var(--text);font-size:1.25rem}.choice-card small{color:var(--muted)}.upload-panel{max-width:700px}.drop-zone{display:grid;place-items:center;gap:8px;min-height:220px;border:2px dashed var(--line);border-radius:10px;cursor:pointer;text-align:center;padding:20px}.drop-zone:hover,.drop-zone.dragging{border-color:var(--lime);background:var(--lime-soft)}.drop-zone input{display:none}.drop-zone span,.upload-message{color:var(--muted)}.analysis-player{display:grid;place-items:center}.analysis-player img{width:100%;max-height:580px;object-fit:contain;min-height:350px;background:var(--camera-bg)}.video-overlay{position:absolute;bottom:14px;left:14px;right:14px;display:flex;justify-content:space-between;background:rgba(17,17,17,.73);padding:7px 10px;border-radius:5px;font-size:.8rem}.analysis-progress progress{width:100%;height:13px;accent-color:var(--lime)}.total-line{margin:25px 0 0;font-size:1.1rem}.total-line span{color:var(--lime)}#overlay-canvas{position:absolute;inset:0;width:100%;height:100%;max-height:580px;object-fit:contain;transform:scaleX(-1);pointer-events:none}#overlay-canvas[hidden]{display:none}@media(max-width:800px){.choice-grid{grid-template-columns:1fr}.analysis-player img{min-height:270px}#overlay-canvas{max-height:none}}
+
+/* ===== WORKOUT PAGE ===== */
+
+/* 1. Exercise Selection Panel */
+#exercise-selection{
+  text-align:center;
+  margin:0 0 20px;
+}
+.exercise-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  max-width:700px;
+  margin:0 auto 20px;
+}
+.exercise-btn{
+  background:var(--choice-gradient);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px 10px;
+  text-decoration:none;
+  display:grid;
+  gap:6px;
+  transition:transform .15s,border-color .15s;
+  cursor:pointer;
+}
+.exercise-btn:hover{
+  transform:translateY(-2px);
+  border-color:var(--lime);
+}
+.exercise-btn.selected{
+  border-color:var(--lime);
+  box-shadow:0 0 0 2px rgba(201,255,68,.18);
+}
+.exercise-btn:disabled,
+.controls-row button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  transform:none;
+}
+.exercise-name{
+  font-size:1.1rem;
+  color:var(--text);
+  margin-bottom:4px;
+}
+.exercise-icon{
+  font-size:1.5rem;
+  color:var(--lime);
+}
+#exercise-selection .primary{
+  display:block;
+  margin:0 auto;
+  max-width:360px;
+  width:100%;
+}
+
+/* 2. Two-column: camera LEFT, stats RIGHT */
+.workout-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.6fr) minmax(300px,.75fr);
+  gap:20px;
+  align-items:start;
+}
+.workout-layout .camera-card{
+  order:1;
+  min-height:0;
+  aspect-ratio:4/3;
+}
+.workout-layout .camera-card video{
+  height:100%;
+  min-height:0;
+  object-fit:contain;
+}
+.workout-sidebar{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-width:0;
+  order:2;
+  height:fit-content;
+}
+
+/* HUD panel */
+.hud.panel{
+  padding:16px;
+  gap:12px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+.hud-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:24px;
+}
+.hud-group{
+  min-width:0;
+  text-align:left;
+}
+.hud-label{
+  font-size:0.75rem;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+}
+.hud-value{
+  font-size:1rem;
+}
+.large{font-size:3rem;font-weight:bold;line-height:1;}
+
+/* Timer */
+.timer-display{
+  font-family:monospace;
+  font-size:1.5rem;
+  font-weight:bold;
+  color:var(--lime);
+}
+
+/* Confidence Bar */
+.confidence-bar{
+  width:100%;
+  height:12px;
+  background:var(--input-bg);
+  border-radius:6px;
+  overflow:hidden;
+  margin-top:4px;
+}
+.confidence-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--lime),#00ff88);
+  border-radius:6px;
+  transition:width .3s ease;
+}
+.confidence-text{
+  font-size:0.75rem;
+  text-align:center;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+/* Live Feedback Panel */
+#feedback-panel{
+  background:var(--feedback-bg);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:16px;
+  display:block;
+}
+.feedback-content{
+  margin-top:8px;
+}
+.feedback-item{
+  background:var(--panel-soft);
+  border-left:3px solid var(--lime);
+  padding:10px 14px;
+  margin-bottom:8px;
+  border-radius:0 8px 8px 0;
+  font-size:0.9rem;
+  color:var(--text);
+}
+.feedback-item:last-child{margin-bottom:0;}
+.feedback-placeholder{
+  color:var(--muted);
+  font-style:italic;
+}
+
+/* 3. Workout Controls — full-width below both columns */
+.workout-controls-bar{
+  margin-top:20px;
+  padding:16px;
+}
+.controls-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:center;
+}
+.controls-row button{
+  min-width:140px;
+  white-space:nowrap;
+}
+
+/* 4. Workout Summary — full-width below controls */
+#workout-summary{
+  margin-top:20px;
+  padding:16px 25px;
+}
+#workout-summary .section-title{
+  align-items:flex-start;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:12px;
+}
+#workout-summary .summary-grid{
+  grid-template-columns:repeat(5,1fr);
+}
+#workout-summary .summary-grid div{
+  padding:7px 10px;
+}
+
+/* ===== Responsive ===== */
+@media(max-width:720px){
+  .workout-layout{
+    grid-template-columns:1fr;
+  }
+  .workout-layout .camera-card,
+  .workout-sidebar{
+    order:initial;
+  }
+  .workout-layout .camera-card{
+    min-height:0;
+  }
+  #workout-summary .summary-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:520px){
+  .hud-row{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+  .controls-row{
+    flex-direction:column;
+  }
+  .controls-row button{
+    min-width:0;
+    width:100%;
+  }
+  #workout-summary .summary-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ===== Live workout layout override: rendered by templates/workout.html ===== */
+.workout-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin:0 0 16px;
+}
+.workout-topbar .primary{
+  min-width:190px;
+  text-align:center;
+}
+.workout-topbar p{
+  margin:0;
+  color:var(--muted);
+  font-weight:bold;
+}
+#exercise-selection[hidden],
+#workout-main[hidden],
+#workout-controls-bar[hidden],
+#workout-summary[hidden]{
+  display:none !important;
+}
+.exercise-selection-panel{
+  margin:0 0 20px;
+}
+.exercise-selection-panel .section-title{
+  text-align:left;
+}
+.exercise-grid{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  max-width:none;
+}
+.exercise-btn{
+  min-height:104px;
+  align-content:center;
+}
+.exercise-icon{
+  font-size:.78rem;
+  line-height:1.2;
+  font-weight:bold;
+  letter-spacing:.05em;
+}
+.exercise-name{
+  font-size:.92rem;
+  line-height:1.2;
+}
+.workout-layout{
+  width:100%;
+  grid-template-columns:minmax(0,1.8fr) minmax(320px,.9fr);
+  gap:22px;
+  align-items:stretch;
+}
+.workout-layout .camera-card{
+  width:100%;
+  min-height:520px;
+  aspect-ratio:16/10;
+}
+.workout-layout .camera-card video{
+  width:100%;
+  height:100%;
+  max-height:none;
+  object-fit:cover;
+}
+.workout-sidebar,
+.workout-sidebar .hud.panel{
+  height:100%;
+}
+.workout-sidebar .hud.panel{
+  min-height:520px;
+}
+.hud-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.hud-value.large,
+.large{
+  color:var(--text);
+  font-size:3.4rem;
+}
+.workout-controls-bar{
+  width:100%;
+}
+.controls-row{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(120px,1fr));
+  align-items:center;
+}
+.controls-row button{
+  width:100%;
+  min-height:48px;
+  padding:12px 14px;
+}
+#workout-summary{
+  width:100%;
+}
+#workout-summary .summary-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+@media(max-width:980px){
+  .exercise-grid,
+  .controls-row{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .workout-layout{
+    grid-template-columns:1fr;
+  }
+  .workout-layout .camera-card,
+  .workout-sidebar .hud.panel{
+    min-height:360px;
+  }
+}
+@media(max-width:620px){
+  .workout-topbar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .workout-topbar .primary{
+    width:100%;
+  }
+  .exercise-grid,
+  .controls-row,
+  #workout-summary .summary-grid{
+    grid-template-columns:1fr;
+  }
+  .hud-row{
+    grid-template-columns:1fr;
+  }
+  .workout-layout .camera-card,
+  .workout-sidebar .hud.panel{
+    min-height:300px;
+  }
+}
+
+/* Uploaded-video analysis: a larger native player with a transparent pose layer. */
+.video-analysis-layout{
+  grid-template-columns:minmax(0,2.4fr) minmax(260px,.6fr);
+}
+.video-analysis-layout .analysis-player{
+  min-height:600px;
+  aspect-ratio:16/9;
+}
+.video-analysis-layout .analysis-player video{
+  object-fit:contain;
+}
+.analysis-pose-overlay{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  max-height:none;
+  min-height:0;
+  object-fit:contain;
+  background:transparent;
+  pointer-events:none;
+  z-index:2;
+}
+.analysis-player .camera-label,
+.analysis-player .video-overlay{
+  z-index:3;
+}
+@media(max-width:980px){
+  .video-analysis-layout .analysis-player{
+    min-height:430px;
+  }
+}
+@media(max-width:620px){
+  .video-analysis-layout .analysis-player{
+    min-height:280px;
+  }
+}

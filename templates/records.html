@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Personal Records{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">BEST EFFORTS</p><h1>Personal records</h1><p>Records are calculated from saved valid workout sessions.</p></section>
+<section class="stat-grid">
+  <article class="stat"><span>Highest reps</span><strong>{{ records.highest_reps.value }}</strong><small>{{ records.highest_reps.date or 'No workouts yet' }}</small></article>
+  <article class="stat"><span>Longest workout</span><strong>{{ records.longest_duration.value }}m</strong><small>{{ records.longest_duration.date or 'No workouts yet' }}</small></article>
+  {% for key, item in records.exercise.items() %}<article class="stat"><span>{{ item.name }}</span><strong>{{ item.value }}</strong><small>{{ item.date or 'No record' }}</small></article>{% endfor %}
+</section>
+<section class="panel">
+  <div class="section-title"><h2>Record source workouts</h2><span>{{ workouts|length }} saved workouts</span></div>
+  {% if workouts %}<div class="table-wrap"><table><thead><tr><th>Date</th><th>Source</th><th>Total reps</th><th>Duration</th></tr></thead><tbody>{% for row in workouts[:20] %}<tr><td>{{ row.ended_at[:10] }}</td><td>{{ row.source_type }}</td><td>{{ row.total_reps }}</td><td>{{ row.duration_seconds or '' }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">Complete a workout to establish records.</p>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Reports{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">EXPORT</p><h1>PDF fitness reports</h1><p>Reports use only your saved workouts, records, and goals.</p></section>
+
+<section class="panel">
+  <form class="filter-form" method="get">
+    <input type="date" name="start" value="{{ start }}">
+    <input type="date" name="end" value="{{ end }}">
+    <button class="primary" type="submit">PREVIEW</button>
+    <a class="secondary" href="{{ url_for('download_report_pdf', start=start, end=end) }}">DOWNLOAD PDF</a>
+  </form>
+</section>
+
+<section class="stat-grid">
+  <article class="stat"><span>Workouts</span><strong>{{ summary.total_workouts }}</strong></article>
+  <article class="stat"><span>Total reps</span><strong>{{ summary.total_reps }}</strong></article>
+  <article class="stat"><span>Duration</span><strong>{{ (summary.total_duration / 60)|round(1) }}m</strong></article>
+  <article class="stat"><span>Streak</span><strong>{{ summary.streak }}</strong></article>
+</section>
+
+<section class="panel">
+  <div class="section-title"><h2>Report contents</h2><span>{{ summary.rows|length }} workouts in range</span></div>
+  <p class="empty">The PDF includes exercise counts, duration, personal records, goal progress, and up to 25 recent workouts for the selected range.</p>
+  {% if goals %}<div class="goal-list">{% for goal, progress in goals %}<article class="goal-card"><h3>{{ goal.title }}</h3><div class="progress-bar"><span style="width: {{ progress.percent }}%"></span></div><p>{{ progress.value }} / {{ goal.target_value }}</p></article>{% endfor %}</div>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Fitness Goals{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">TARGETS</p><h1>Fitness goals</h1><p>Goals use your saved workouts, schedules, and weight entries. No synthetic progress is shown.</p></section>
+<section class="panel">
+  <form class="filter-form" method="post" action="{{ url_for('save_goal') }}">
+    <select name="goal_type" required><option value="">Goal type</option><option value="frequency">Workout frequency</option><option value="consistency">Consistency streak</option><option value="rep_target">Rep-count target</option><option value="duration">Workout duration minutes</option><option value="performance">Personal performance</option><option value="weight">Weight target</option></select>
+    <input name="title" placeholder="Goal title" required>
+    <input type="number" step="0.1" name="target_value" placeholder="Target" required>
+    <select name="exercise_key"><option value="">Any exercise</option>{% for ex in exercises %}<option value="{{ ex.key }}">{{ ex.name }}</option>{% endfor %}</select>
+    <input type="date" name="deadline">
+    <button class="primary" type="submit">SAVE GOAL</button>
+  </form>
+</section>
+<section class="goal-list">
+  {% for goal, progress in goals %}
+  <article class="panel goal-card">
+    <div class="section-title"><h2>{{ goal.title }}</h2><span>{{ goal.goal_type.replace('_', ' ')|title }}{% if goal.deadline %} · due {{ goal.deadline }}{% endif %}</span></div>
+    <div class="progress-bar"><span style="width: {{ progress.percent }}%"></span></div>
+    <p>{{ progress.value }} / {{ goal.target_value }} · {{ progress.percent }}% complete</p>
+    <details><summary>Edit goal</summary>
+      <form class="filter-form" method="post" action="{{ url_for('save_goal') }}">
+        <input type="hidden" name="goal_id" value="{{ goal.id }}">
+        <select name="goal_type" required>{% for type in ['frequency','consistency','rep_target','duration','performance','weight'] %}<option value="{{ type }}" {% if goal.goal_type == type %}selected{% endif %}>{{ type.replace('_', ' ')|title }}</option>{% endfor %}</select>
+        <input name="title" value="{{ goal.title }}" required>
+        <input type="number" step="0.1" name="target_value" value="{{ goal.target_value }}" required>
+        <select name="exercise_key"><option value="">Any exercise</option>{% for ex in exercises %}<option value="{{ ex.key }}" {% if goal.exercise_key == ex.key %}selected{% endif %}>{{ ex.name }}</option>{% endfor %}</select>
+        <input type="date" name="deadline" value="{{ goal.deadline or '' }}">
+        <button class="secondary" type="submit">SAVE EDITS</button>
+      </form>
+    </details>
+    <form method="post" action="{{ url_for('delete_goal', goal_id=goal.id) }}"><button class="danger" type="submit">DELETE GOAL</button></form>
+  </article>
+  {% else %}<section class="panel"><p class="empty">No goals yet. Create one above.</p></section>{% endfor %}
+</section>
+{% endblock %}

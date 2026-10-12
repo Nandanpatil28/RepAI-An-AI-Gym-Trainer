@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+
 import cv2
 
 from exercise_engine import WorkoutEngine
@@ -37,14 +39,34 @@ class VideoAnalyzer:
         The browser owns native playback and submits at most ``ai_fps`` frames per
         second. This deliberately decouples MediaPipe latency from the video clock.
         """
-        data = self.engine.process(frame)
+        result = self.engine.process(frame, draw_landmarks=True)
+        data, annotated = result
+        image = None
+
+        # Reuse the live workout landmark renderer, but send only its drawn
+        # pixels as a transparent PNG. This leaves native video playback fully
+        # visible beneath the body skeleton.
+        if annotated is not None and data["pose_quality"] == "tracking":
+            source = cv2.resize(frame, (annotated.shape[1], annotated.shape[0]))
+            difference = cv2.absdiff(annotated, source)
+            mask = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY) > 10
+            overlay = cv2.cvtColor(annotated, cv2.COLOR_BGR2BGRA)
+            overlay[:, :, 3] = mask.astype("uint8") * 255
+            overlay = cv2.resize(
+                overlay,
+                (frame.shape[1], frame.shape[0]),
+                interpolation=cv2.INTER_LINEAR,
+            )
+            ok, encoded = cv2.imencode(".png", overlay)
+            if ok:
+                image = "data:image/png;base64," + base64.b64encode(encoded.tobytes()).decode("ascii")
         self.sampled_frames += 1
         self.playback_seconds = max(0.0, min(float(timestamp_seconds), self.duration_seconds))
         self.frame_index = min(self.frame_count, int(round(self.playback_seconds * self.fps)))
         if data["status"] != "NO POSE DETECTED":
             self.person_frames += 1
             self.detected_exercises.add(data["mode"])
-        return self.payload(data)
+        return self.payload(data, image)
 
     def payload(self, data=None, image=None):
         data = data or self.engine.snapshot(self.person_frames > 0)

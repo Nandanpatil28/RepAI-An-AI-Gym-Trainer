@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Reminders{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">STAY CONSISTENT</p><h1>Workout reminders</h1><p>Schedule in-app reminders using your timezone and notification preferences.</p></section>
+
+<section class="panel">
+  <div class="section-title"><h2>Create reminder</h2><span>{{ timezone_name }}</span></div>
+  <form class="filter-form" method="post" action="{{ url_for('save_reminder') }}">
+    <input name="title" placeholder="Workout title" required maxlength="120">
+    <input type="date" name="reminder_date" value="{{ today }}" required>
+    <input type="time" name="reminder_time" required>
+    <input name="timezone" value="{{ timezone_name }}" required>
+    <input name="note" placeholder="Optional note">
+    <label class="check-row"><input type="checkbox" name="enabled" checked> Enabled</label>
+    <button class="primary" type="submit">SAVE REMINDER</button>
+  </form>
+</section>
+
+<section class="library-grid">
+  {% for reminder in reminders %}
+  <article class="panel exercise-card">
+    <div class="section-title"><h2>{{ reminder.title }}</h2><span>{{ 'Enabled' if reminder.enabled else 'Disabled' }}</span></div>
+    <p>{{ reminder.reminder_date }} at {{ reminder.reminder_time }} {{ reminder.timezone }}</p>
+    {% if reminder.note %}<p>{{ reminder.note }}</p>{% endif %}
+    {% if reminder.email_status == 'sent' %}<p class="empty">Email sent {{ reminder.email_sent_at[:16].replace('T', ' ') }}</p>
+    {% elif reminder.email_status == 'failed' %}<p class="empty">Email delivery could not be completed. Update the reminder or account email and try again.</p>
+    {% elif reminder.email_status == 'skipped_invalid_recipient' %}<p class="empty">Email delivery skipped because the account email is invalid.</p>{% endif %}
+    {% if reminder.last_notified_at %}<p class="empty">Dismissed {{ reminder.last_notified_at[:16].replace('T', ' ') }}</p>{% endif %}
+    <details><summary>Edit reminder</summary>
+      <form class="planner-form" method="post" action="{{ url_for('save_reminder') }}">
+        <input type="hidden" name="reminder_id" value="{{ reminder.id }}">
+        <input name="title" value="{{ reminder.title }}" required maxlength="120">
+        <input type="date" name="reminder_date" value="{{ reminder.reminder_date }}" required>
+        <input type="time" name="reminder_time" value="{{ reminder.reminder_time }}" required>
+        <input name="timezone" value="{{ reminder.timezone }}" required>
+        <input name="note" value="{{ reminder.note or '' }}">
+        <label class="check-row"><input type="checkbox" name="enabled" {% if reminder.enabled %}checked{% endif %}> Enabled</label>
+        <button class="secondary" type="submit">SAVE EDITS</button>
+      </form>
+    </details>
+    <div class="inline-actions">
+      <form method="post" action="{{ url_for('update_reminder', reminder_id=reminder.id, action='enable' if not reminder.enabled else 'disable') }}"><button class="secondary" type="submit">{{ 'ENABLE' if not reminder.enabled else 'DISABLE' }}</button></form>
+      <form method="post" action="{{ url_for('update_reminder', reminder_id=reminder.id, action='delete') }}"><button class="danger" type="submit">DELETE</button></form>
+    </div>
+  </article>
+  {% else %}<section class="panel"><p class="empty">No reminders yet.</p></section>{% endfor %}
+</section>
+{% endblock %}

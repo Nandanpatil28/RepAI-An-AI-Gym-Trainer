@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Admin{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">ADMIN</p><h1>Admin dashboard</h1><p>Aggregate statistics and limited account and exercise-library management.</p></section>
+
+<section class="stat-grid">
+  <article class="stat"><span>Active users</span><strong>{{ stats.users }}</strong></article>
+  <article class="stat"><span>Admins</span><strong>{{ stats.admins }}</strong></article>
+  <article class="stat"><span>Workouts</span><strong>{{ stats.workouts }}</strong></article>
+  <article class="stat"><span>Total reps</span><strong>{{ stats.reps }}</strong></article>
+  <article class="stat"><span>Active reminders</span><strong>{{ stats.reminders }}</strong></article>
+</section>
+
+<section class="panel">
+  <div class="section-title"><h2>User accounts</h2><span>No passwords or secrets shown</span></div>
+  <div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Role</th><th>Status</th><th>Workouts</th><th>Reps</th><th>Actions</th></tr></thead><tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.name }}</td><td>{{ user.email }}</td><td>{{ user.created_at[:10] }}</td><td>{{ 'Admin' if user.is_admin else 'User' }}</td><td>{{ 'Active' if user.active else 'Disabled' }}</td><td>{{ user.workout_count }}</td><td>{{ user.total_reps }}</td>
+      <td class="table-actions">
+        <form method="post" action="{{ url_for('admin_update_user', user_id=user.id, action='promote' if not user.is_admin else 'demote') }}"><button class="secondary" type="submit">{{ 'Promote' if not user.is_admin else 'Demote' }}</button></form>
+        <form method="post" action="{{ url_for('admin_update_user', user_id=user.id, action='disable' if user.active else 'enable') }}"><button class="danger" type="submit">{{ 'Disable' if user.active else 'Enable' }}</button></form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="panel">
+  <div class="section-title"><h2>Add exercise</h2><span>Admin-managed manual exercises</span></div>
+  <form class="planner-form" method="post" action="{{ url_for('admin_save_exercise') }}">
+    <div class="form-grid">
+      <input name="name" placeholder="Name" required>
+      <input name="category" placeholder="Category" required>
+      <input name="muscles" placeholder="Muscles" required>
+      <input name="difficulty" placeholder="Difficulty" required>
+      <input name="equipment" placeholder="Equipment">
+    </div>
+    <textarea name="description" rows="3" placeholder="Description" required></textarea>
+    <textarea name="instructions" rows="4" placeholder="One instruction per line"></textarea>
+    <label class="check-row"><input type="checkbox" name="active" checked> Active in exercise library</label>
+    <button class="primary" type="submit">SAVE EXERCISE</button>
+  </form>
+</section>
+
+<section class="library-grid">
+  {% for exercise in exercises %}
+  <article class="panel exercise-card">
+    <div class="section-title"><h2>{{ exercise.name }}</h2><span>{{ 'Active' if exercise.active else 'Inactive' }}</span></div>
+    <p>{{ exercise.category }} - {{ exercise.difficulty }}</p>
+    <p>{{ exercise.description }}</p>
+    <details><summary>Edit exercise</summary>
+      <form class="planner-form" method="post" action="{{ url_for('admin_save_exercise') }}">
+        <input type="hidden" name="exercise_id" value="{{ exercise.id }}">
+        <input name="name" value="{{ exercise.name }}" required>
+        <input name="category" value="{{ exercise.category }}" required>
+        <input name="muscles" value="{{ exercise.muscles }}" required>
+        <input name="difficulty" value="{{ exercise.difficulty }}" required>
+        <input name="equipment" value="{{ exercise.equipment or '' }}">
+        <textarea name="description" rows="3" required>{{ exercise.description }}</textarea>
+        <textarea name="instructions" rows="4">{{ exercise.instructions or '' }}</textarea>
+        <label class="check-row"><input type="checkbox" name="active" {% if exercise.active %}checked{% endif %}> Active</label>
+        <button class="secondary" type="submit">SAVE EDITS</button>
+      </form>
+    </details>
+    <form method="post" action="{{ url_for('admin_delete_exercise', exercise_id=exercise.id) }}"><button class="danger" type="submit">DELETE</button></form>
+  </article>
+  {% else %}<section class="panel"><p class="empty">No admin-managed exercises yet.</p></section>{% endfor %}
+</section>
+{% endblock %}

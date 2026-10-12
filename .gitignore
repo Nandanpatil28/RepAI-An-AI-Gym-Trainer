@@ -8,3 +8,37 @@ uploads/
 .vscode/
 .idea/
 .DS_Store
+
+
+# Local databases and user data
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment and secrets
+.env.*
+!.env.example
+
+# Python environments and cache
+.venv/
+.pytest_cache/
+
+# Model caches and generated weights
+.cache/
+huggingface_cache/
+
+# Protected datasets - do not upload
+datasets/images/
+datasets/khana/
+
+
+# Never upload protected datasets
+/datasets/images/
+/datasets/khana/
+
+# Ignore local database changes for future untracked files
+/database/*.db
+
+
+/datasets/images/

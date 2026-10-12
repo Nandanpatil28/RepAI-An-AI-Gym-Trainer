@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Progress Analytics{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">REAL PROGRESS</p><h1>Progress analytics</h1><p>Charts and totals are calculated only from saved workouts and recorded weights.</p></section>
+<section class="panel">
+  <form class="filter-form" method="get">
+    <input type="date" name="start" value="{{ start }}">
+    <input type="date" name="end" value="{{ end }}">
+    <button class="primary" type="submit">APPLY DATES</button>
+    <a class="secondary" href="{{ url_for('progress_analytics') }}">RESET</a>
+  </form>
+</section>
+<section class="stat-grid">
+  <article class="stat"><span>Workouts</span><strong>{{ summary.total_workouts }}</strong></article>
+  <article class="stat"><span>Total reps</span><strong>{{ summary.total_reps }}</strong></article>
+  <article class="stat"><span>Duration</span><strong>{{ (summary.total_duration / 60)|round(1) }}m</strong></article>
+  <article class="stat"><span>Streak</span><strong>{{ summary.streak }}</strong></article>
+  {% for key, value in summary.per_exercise.items() %}<article class="stat"><span>{{ key }}</span><strong>{{ value }}</strong></article>{% endfor %}
+</section>
+<section class="panel">
+  <div class="section-title"><h2>Daily activity</h2><span>{{ summary.by_day|length }} active days</span></div>
+  {% if summary.by_day %}<div class="chart-list">{% set max_reps = summary.by_day|map(attribute='reps')|max %}{% for day in summary.by_day %}<div class="chart-row"><span>{{ day.date }}</span><div><b style="width: {{ (day.reps / max_reps * 100) if max_reps else 0 }}%"></b></div><strong>{{ day.reps }} reps</strong></div>{% endfor %}</div>{% else %}<p class="empty">No workouts in this date range.</p>{% endif %}
+</section>
+<section class="panel">
+  <div class="section-title"><h2>Weight history</h2><span>Recorded by you</span></div>
+  <form class="filter-form" method="post" action="{{ url_for('save_weight_entry') }}"><input type="date" name="entry_date"><input type="number" step="0.1" name="weight_kg" placeholder="Weight kg" required><input name="notes" placeholder="Notes"><button class="primary" type="submit">SAVE WEIGHT</button></form>
+  {% if weights %}<div class="table-wrap"><table><thead><tr><th>Date</th><th>Weight</th><th>Notes</th></tr></thead><tbody>{% for row in weights %}<tr><td>{{ row.entry_date }}</td><td>{{ row.weight_kg }} kg</td><td>{{ row.notes or '' }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">No weight entries yet.</p>{% endif %}
+</section>
+{% endblock %}

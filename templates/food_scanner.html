@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Food Scanner{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <p class="eyebrow">LOCAL FOOD RECOGNITION</p>
+  <h1>Food scanner</h1>
+  <p>Upload one food photo. Recognition runs locally, and nutrition values are estimates from USDA FoodData Central.</p>
+</section>
+
+<section class="food-scanner-layout">
+  <article class="upload-panel panel">
+    <form id="food-scan-form">
+      <label id="food-drop-zone" class="drop-zone">
+        <input id="food-image" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" required>
+        <strong>Drag & drop food photo here</strong>
+        <span>or choose JPG, PNG, or WebP · maximum 8 MB</span>
+      </label>
+      <img id="food-preview" class="food-preview" alt="" hidden>
+      <p id="food-upload-message" class="upload-message" aria-live="polite"></p>
+      <button class="primary" type="submit">SCAN FOOD</button>
+    </form>
+  </article>
+
+  <article id="food-results" class="panel food-results" hidden>
+    <div class="section-title">
+      <h2>Prediction</h2>
+      <span id="food-model-device"></span>
+    </div>
+    <div id="prediction-list" class="prediction-list"></div>
+    <form id="nutrition-form" class="meal-log-form">
+      <label>Selected food
+        <input id="selected-food-name" name="food_name" required>
+      </label>
+      <label>Serving size in grams
+        <input id="serving-grams" type="number" min="1" max="5000" step="1" value="100" required>
+      </label>
+      <div class="macro-row food-macro-row">
+        <span><strong id="calories-value">0</strong> kcal</span>
+        <span><strong id="protein-value">0</strong> g protein</span>
+        <span><strong id="carbs-value">0</strong> g carbs</span>
+        <span><strong id="fat-value">0</strong> g fat</span>
+      </div>
+      <p id="nutrition-note" class="empty"></p>
+      <div class="scanner-actions">
+        <button class="secondary" id="lookup-nutrition" type="button">LOOK UP NUTRITION</button>
+        <button class="primary" id="save-food-log" type="submit">SAVE TO FOOD LOG</button>
+      </div>
+    </form>
+  </article>
+</section>
+
+{% if recent_logs %}
+<section class="panel">
+  <div class="section-title"><h2>Recent scanned meals</h2><span>{{ recent_logs|length }} latest</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Logged</th><th>Food</th><th>Serving</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th></tr></thead>
+      <tbody>
+        {% for item in recent_logs %}
+        <tr>
+          <td>{{ item.logged_at[:16].replace('T', ' ') }}</td>
+          <td>{{ item.dish_name }}</td>
+          <td>{{ item.serving_grams }} g</td>
+          <td>{{ item.calories or 0 }}</td>
+          <td>{{ item.protein or 0 }} g</td>
+          <td>{{ item.carbs or 0 }} g</td>
+          <td>{{ item.fat or 0 }} g</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/food_scanner.js') }}"></script>
+{% endblock %}

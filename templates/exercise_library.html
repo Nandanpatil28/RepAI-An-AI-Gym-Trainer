@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Exercise Library{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">MOVEMENT GUIDE</p><h1>Exercise library</h1><p>Search exercises, review instructions, and jump into supported AI-tracked movements.</p></section>
+<section class="panel">
+  <form class="filter-form" method="get">
+    <input name="q" placeholder="Search by exercise, muscle, or description" value="{{ query }}">
+    <select name="category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+    <select name="difficulty"><option value="">All difficulties</option>{% for d in difficulties %}<option value="{{ d }}" {% if selected_difficulty == d %}selected{% endif %}>{{ d }}</option>{% endfor %}</select>
+    <button class="primary" type="submit">FILTER</button>
+  </form>
+</section>
+<section class="library-grid">
+  {% for item in exercises %}
+  <article class="panel exercise-card">
+    <div class="section-title"><h2>{{ item.name }}</h2><span>{{ item.category }} · {{ item.difficulty }}</span></div>
+    <p>{{ item.description }}</p>
+    <p><strong>Muscles:</strong> {{ item.muscles }}</p>
+    <p><strong>Equipment:</strong> {{ item.equipment }}</p>
+    {% if item.demo %}<video class="demo-video" controls preload="metadata"><source src="{{ url_for('exercise_demo', filename=item.demo.split('/')[-1]) }}"></video>{% endif %}
+    <ol>{% for step in item.instructions %}<li>{{ step }}</li>{% endfor %}</ol>
+    <div class="controls">
+      {% if item.supported %}<a class="primary" href="{{ url_for('workout', exercise=item.key) }}">START AI TRACKING</a>{% else %}<span class="empty">Manual planner exercise</span>{% endif %}
+    </div>
+  </article>
+  {% else %}
+  <section class="panel"><p class="empty">No exercises match those filters.</p></section>
+  {% endfor %}
+</section>
+{% endblock %}

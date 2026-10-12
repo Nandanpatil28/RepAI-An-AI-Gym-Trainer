@@ -1,1 +1,42 @@
-{% extends 'base.html' %}{% block title %}RepAI | Dashboard{% endblock %}{% block content %}<section class="hero"><div><p class="eyebrow">YOUR PERFORMANCE</p><h1>Welcome back, {{ session.user_name }}</h1><p>Every rep is tracked by your real-time pose coach.</p></div></section><section class="choice-grid"><a class="choice-card" href="{{ url_for('workout') }}"><span>LIVE VIDEO</span><strong>START LIVE VIDEO →</strong><small>Use your computer or laptop camera for a live workout.</small></a><a class="choice-card" href="{{ url_for('upload_video') }}"><span>ANALYSE A VIDEO</span><strong>ANALYSE VIDEO →</strong><small>Upload a workout video and let RepAI analyze it.</small></a><a class="choice-card" href="{{ url_for('mobile_camera_connection') }}"><span>CONNECT MOBILE CAMERA</span><strong>CONNECT MOBILE CAMERA →</strong><small>Use a smartphone as a remote wireless camera for your PC.</small></a></section><section class="stat-grid">{% for label,key in [('Push-Ups','pushups'),('Pull-Ups','pullups'),('Sit-Ups','situps'),('Squats','squats'),('Walking','walking'),('Total Reps','total_reps')] %}<article class="stat"><span>{{ label }}</span><strong>{{ totals[key] }}</strong></article>{% endfor %}</section><section class="panel"><div class="section-title"><h2>Recent workouts</h2><a href="{{ url_for('history') }}">View all</a></div>{% if recent %}<div class="table-wrap"><table><thead><tr><th>Finished</th><th>Push-ups</th><th>Pull-ups</th><th>Sit-ups</th><th>Squats</th><th>Walk</th><th>Total</th></tr></thead><tbody>{% for item in recent %}<tr><td>{{ item.ended_at[:16].replace('T', ' ') }} UTC</td><td>{{ item.pushups }}</td><td>{{ item.pullups }}</td><td>{{ item.situps }}</td><td>{{ item.squats }}</td><td>{{ item.walking }}</td><td>{{ item.total_reps }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">No saved workouts yet. Your first set starts now.</p>{% endif %}</section>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}RepAI | Dashboard{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">YOUR PERFORMANCE</p>
+    <h1>Welcome back, {{ session.user_name }}</h1>
+    <p>Every rep is tracked by your real-time pose coach.</p>
+  </div>
+</section>
+<section class="choice-grid">
+  <a class="choice-card" href="{{ url_for('workout') }}"><span>LIVE VIDEO</span><strong>START LIVE VIDEO →</strong><small>Use your computer or laptop camera for a live workout.</small></a>
+  <a class="choice-card" href="{{ url_for('upload_video') }}"><span>ANALYSE A VIDEO</span><strong>ANALYSE VIDEO →</strong><small>Upload a workout video and let RepAI analyze it.</small></a>
+  <a class="choice-card" href="{{ url_for('exercise_library') }}"><span>EXERCISES</span><strong>LIBRARY →</strong><small>Find movements and launch supported AI tracking.</small></a>
+  <a class="choice-card" href="{{ url_for('workout_planner') }}"><span>PLANNING</span><strong>WORKOUT PLANNER →</strong><small>Create routines, schedules, and completion records.</small></a>
+  <a class="choice-card" href="{{ url_for('progress_analytics') }}"><span>PROGRESS</span><strong>ANALYTICS →</strong><small>View charts, streaks, records, and weight history.</small></a>
+  <a class="choice-card" href="{{ url_for('meal_planner') }}"><span>NUTRITION</span><strong>MEAL PLANNER →</strong><small>Generate weekly meals from your saved profile and track intake.</small></a>
+  <a class="choice-card" href="{{ url_for('food_scanner') }}"><span>FOOD SCANNER</span><strong>SCAN MEAL →</strong><small>Upload a food photo for local recognition and estimated macros.</small></a>
+</section>
+<section class="stat-grid">
+  {% for label,key in [('Push-Ups','pushups'),('Pull-Ups','pullups'),('Sit-Ups','situps'),('Squats','squats'),('Walking','walking'),('Total Reps','total_reps')] %}
+  <article class="stat"><span>{{ label }}</span><strong>{{ totals[key] }}</strong></article>
+  {% endfor %}
+</section>
+<section class="panel">
+  <div class="section-title"><h2>Recent workouts</h2><a href="{{ url_for('history') }}">View all</a></div>
+  {% if recent %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Finished</th><th>Push-ups</th><th>Pull-ups</th><th>Sit-ups</th><th>Squats</th><th>Walk</th><th>Total</th></tr></thead>
+      <tbody>
+        {% for item in recent %}
+        <tr><td>{{ item.ended_at[:16].replace('T', ' ') }} UTC</td><td>{{ item.pushups }}</td><td>{{ item.pullups }}</td><td>{{ item.situps }}</td><td>{{ item.squats }}</td><td>{{ item.walking }}</td><td>{{ item.total_reps }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No saved workouts yet. Your first set starts now.</p>
+  {% endif %}
+</section>
+{% endblock %}

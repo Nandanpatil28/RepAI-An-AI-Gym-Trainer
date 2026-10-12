@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Settings{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">ACCOUNT CONTROL</p><h1>Settings</h1><p>Manage your account, preferences, notifications, password, and privacy options.</p></section>
+
+<section class="settings-grid">
+  <article class="panel">
+    <div class="section-title"><h2>Account</h2><span>{{ user.email }}</span></div>
+    <form class="profile-form" method="post" action="{{ url_for('update_account') }}">
+      <label>Name<input name="name" value="{{ user.name }}" required maxlength="80"></label>
+      <label>Email<input type="email" name="email" value="{{ user.email }}" required></label>
+      <button class="primary" type="submit">SAVE ACCOUNT</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <div class="section-title"><h2>Preferences</h2><span>Used across meals, reminders, and reports</span></div>
+    <form class="profile-form" method="post" action="{{ url_for('update_preferences') }}">
+      <div class="form-grid">
+        <label>Measurement units
+          <select name="measurement_units">
+            <option value="metric" {% if not profile or profile.measurement_units == 'metric' %}selected{% endif %}>Metric</option>
+            <option value="imperial" {% if profile and profile.measurement_units == 'imperial' %}selected{% endif %}>Imperial</option>
+          </select>
+        </label>
+        <label>Timezone
+          <select name="timezone">
+            {% for tz in common_timezones %}<option value="{{ tz }}" {% if profile and profile.timezone == tz %}selected{% endif %}>{{ tz }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Fitness goal
+          <select name="fitness_goal"><option value="">Choose goal</option>{% for goal in goals %}<option value="{{ goal }}" {% if profile and profile.fitness_goal == goal %}selected{% endif %}>{{ goal.replace('_', ' ')|title }}</option>{% endfor %}</select>
+        </label>
+        <label>Activity level
+          <select name="activity_level"><option value="">Choose activity</option>{% for activity in activities %}<option value="{{ activity }}" {% if profile and profile.activity_level == activity %}selected{% endif %}>{{ activity.replace('_', ' ')|title }}</option>{% endfor %}</select>
+        </label>
+        <label>Dietary preference
+          <select name="dietary_preference"><option value="">Choose preference</option>{% for preference in preferences %}<option value="{{ preference }}" {% if profile and profile.dietary_preference == preference %}selected{% endif %}>{{ preference|title }}</option>{% endfor %}</select>
+        </label>
+        <label>Meals per day<input type="number" name="meals_per_day" min="3" max="6" value="{{ profile.meals_per_day if profile and profile.meals_per_day else 3 }}"></label>
+      </div>
+      <label class="check-row"><input type="checkbox" name="notify_in_app" {% if not profile or profile.notify_in_app %}checked{% endif %}> In-app reminders</label>
+      <label class="check-row"><input type="checkbox" name="notify_email" {% if profile and profile.notify_email %}checked{% endif %}> Email reminders when server email is configured</label>
+      <button class="primary" type="submit">SAVE PREFERENCES</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <div class="section-title"><h2>Password</h2><span>Requires current password</span></div>
+    <form class="profile-form" method="post" action="{{ url_for('change_password') }}">
+      <label>Current password<input type="password" name="current_password" required autocomplete="current-password"></label>
+      <label>New password<input type="password" name="new_password" required minlength="8" autocomplete="new-password"></label>
+      <label>Confirm new password<input type="password" name="confirm_password" required minlength="8" autocomplete="new-password"></label>
+      <button class="primary" type="submit">CHANGE PASSWORD</button>
+    </form>
+  </article>
+
+  <article class="panel danger-zone">
+    <div class="section-title"><h2>Privacy</h2><span>Account management</span></div>
+    <p class="empty">Deleting your account removes your profile, meal plans, reminders, workouts, goals, achievements, and analytics data from this app.</p>
+    <form class="profile-form" method="post" action="{{ url_for('delete_account') }}">
+      <label>Type your email to confirm<input name="confirm_delete" placeholder="{{ user.email }}"></label>
+      <button class="danger" type="submit">DELETE MY ACCOUNT</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

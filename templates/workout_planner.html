@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}RepAI | Workout Planner{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">TRAINING PLAN</p><h1>Workout planner</h1><p>Create routines, schedule them, and track completion against your real workout history.</p></section>
+
+<section class="panel">
+  <div class="section-title"><h2>Create routine</h2><span>Use supported exercises to start AI tracking from the plan.</span></div>
+  <form class="planner-form" method="post" action="{{ url_for('save_routine') }}">
+    <div class="form-grid"><label>Name<input name="name" required maxlength="100"></label><label>Description<input name="description"></label></div>
+    <div class="routine-builder">
+      {% for n in range(4) %}
+      <div class="routine-row">
+        <select name="exercise_key"><option value="">Exercise</option>{% for ex in exercises %}<option value="{{ ex.key }}">{{ ex.name }}</option>{% endfor %}</select>
+        <input type="number" name="sets" min="1" max="20" value="3" aria-label="Sets">
+        <input type="number" name="reps" min="0" max="1000" value="10" aria-label="Reps">
+        <input type="number" name="duration_seconds" min="0" max="7200" value="0" aria-label="Duration seconds">
+        <input type="number" name="rest_seconds" min="0" max="1800" value="60" aria-label="Rest seconds">
+      </div>
+      {% endfor %}
+    </div>
+    <p class="empty">Columns: exercise, sets, reps, duration seconds, rest seconds.</p>
+    <button class="primary" type="submit">SAVE ROUTINE</button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="section-title"><h2>Schedule workout</h2><span>{{ today }}</span></div>
+  <form class="filter-form" method="post" action="{{ url_for('schedule_routine') }}">
+    <select name="routine_id" required><option value="">Choose routine</option>{% for routine in routines %}<option value="{{ routine.id }}">{{ routine.name }}</option>{% endfor %}</select>
+    <input type="date" name="scheduled_date" value="{{ today }}" required>
+    <input name="notes" placeholder="Optional notes">
+    <button class="primary" type="submit">SCHEDULE</button>
+  </form>
+</section>
+
+<section class="library-grid">
+  {% for routine, items in routine_views %}
+  <article class="panel exercise-card">
+    <div class="section-title"><h2>{{ routine.name }}</h2><span>{{ items|length }} exercises</span></div>
+    <p class="empty">{{ routine.description or 'No description.' }}</p>
+    <div class="table-wrap"><table><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Duration</th><th>Rest</th><th></th></tr></thead><tbody>
+      {% for item in items %}<tr><td>{{ item.exercise_name }}</td><td>{{ item.sets }}</td><td>{{ item.reps }}</td><td>{{ item.duration_seconds }}s</td><td>{{ item.rest_seconds }}s</td><td>{% if item.exercise_key in ['push-up','pull-up','sit-up','squat','walk'] %}<a href="{{ url_for('workout', exercise=item.exercise_key) }}">Start</a>{% endif %}</td></tr>{% endfor %}
+    </tbody></table></div>
+    <details><summary>Edit routine</summary>
+      <form class="planner-form" method="post" action="{{ url_for('save_routine') }}">
+        <input type="hidden" name="routine_id" value="{{ routine.id }}">
+        <div class="form-grid"><label>Name<input name="name" value="{{ routine.name }}" required></label><label>Description<input name="description" value="{{ routine.description or '' }}"></label></div>
+        {% for item in items %}
+        <div class="routine-row">
+          <select name="exercise_key">{% for ex in exercises %}<option value="{{ ex.key }}" {% if item.exercise_key == ex.key %}selected{% endif %}>{{ ex.name }}</option>{% endfor %}</select>
+          <input type="number" name="sets" min="1" max="20" value="{{ item.sets }}">
+          <input type="number" name="reps" min="0" max="1000" value="{{ item.reps }}">
+          <input type="number" name="duration_seconds" min="0" max="7200" value="{{ item.duration_seconds }}">
+          <input type="number" name="rest_seconds" min="0" max="1800" value="{{ item.rest_seconds }}">
+        </div>
+        {% endfor %}
+        <button class="secondary" type="submit">SAVE EDITS</button>
+      </form>
+    </details>
+    <div class="controls inline-actions">
+      <form method="post" action="{{ url_for('duplicate_routine', routine_id=routine.id) }}"><button class="secondary" type="submit">DUPLICATE</button></form>
+      <form method="post" action="{{ url_for('delete_routine', routine_id=routine.id) }}"><button class="danger" type="submit">DELETE</button></form>
+    </div>
+  </article>
+  {% else %}<section class="panel"><p class="empty">No routines yet. Create your first plan above.</p></section>{% endfor %}
+</section>
+
+<section class="panel">
+  <div class="section-title"><h2>Upcoming and missed workouts</h2><span>Real scheduled records</span></div>
+  {% if schedules %}<div class="table-wrap"><table><thead><tr><th>Date</th><th>Routine</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead><tbody>
+    {% for s in schedules %}
+    <tr><td>{{ s.scheduled_date }}</td><td>{{ s.routine_name }}</td><td>{% if s.status == 'scheduled' and s.scheduled_date < today %}missed{% else %}{{ s.status }}{% endif %}</td><td>{{ s.notes or '' }}</td><td class="table-actions">{% if s.status != 'completed' %}<form method="post" action="{{ url_for('update_schedule', schedule_id=s.id, action='complete') }}"><button class="secondary" type="submit">Complete</button></form>{% endif %}<form method="post" action="{{ url_for('update_schedule', schedule_id=s.id, action='delete') }}"><button class="danger" type="submit">Delete</button></form></td></tr>
+    {% endfor %}
+  </tbody></table></div>{% else %}<p class="empty">No scheduled workouts yet.</p>{% endif %}
+</section>
+{% endblock %}
