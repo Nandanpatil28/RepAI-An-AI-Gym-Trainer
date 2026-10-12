@@ -1,0 +1,38 @@
+# Training configuration for MobileNetV2 food classification
+# Use only datasets/khana/
+
+# Dataset paths
+dataset_root: "datasets/khana"
+manifest_output: "train/dataset_manifest.csv"
+model_output_dir: "train/models"
+logs_dir: "train/logs"
+
+# Class label mapping
+class_labels_output: "train/class_labels.json"
+
+# Image and data settings
+image_size: [224, 224]
+random_seed: 42
+
+# Dataset splits (must sum to 1.0)
+train_split: 0.70
+val_split: 0.15
+test_split: 0.15
+
+# Training hyperparameters
+batch_size: 32
+learning_rate_head: 0.001
+learning_rate_finetune: 0.0001
+epochs_head: 15
+epochs_finetune: 10
+early_stopping_patience: 3
+
+# Model settings
+use_imagenet_weights: true
+freeze_base: true  # Freeze MobileNetV2 base during head training
+
+# Output model format
+model_format: "keras"  # 'keras' or 'savedmodel'
+
+# Logging
+verbose: 1  # 0=silent, 1=progress bar, 2=one line per epoch
